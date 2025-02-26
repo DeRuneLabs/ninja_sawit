@@ -1,0 +1,56 @@
+extends CharacterBody2D
+@onready var player_info: AnimatedSprite2D = $AnimatedSprite2D
+
+
+const SPEED = 250.0
+const JUMP_VELOCITY = -250.0
+
+func animation_running(velocity_x):
+	if velocity_x > 0:
+		player_info.flip_h = false
+		player_info.animation = "run"
+	elif velocity_x < 0:
+		player_info.flip_h = true
+		player_info.animation = "run"
+	else:
+		player_info.animation = "idle"
+	
+func animation_jumping(velocity_y):
+	if velocity_y > 0:
+		player_info.animation = "jump"
+	elif velocity_y < 0:
+		player_info.animation = "jump"
+	
+
+func _physics_process(delta: float) -> void:
+	"""
+	model pyhsic processing
+	
+	Parameter:
+		delta (float): parameter player to set keyboard move left right and jump
+		
+	Return:
+		None
+	"""
+	# Add the gravity.
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+			
+	# Handle jump.
+	if Input.is_action_just_pressed("ui_accept") or Input.is_action_just_pressed("ui_up") and is_on_floor():
+		velocity.y = JUMP_VELOCITY
+		print(velocity.y)
+		
+		
+
+	# Get the input direction and handle the movement/deceleration.
+	# As good practice, you should replace UI actions with custom gameplay actions.
+	var direction := Input.get_axis("ui_left", "ui_right")
+	if direction:
+		velocity.x = direction * SPEED
+	else:
+		velocity.x = move_toward(velocity.x, 0, SPEED)
+
+	move_and_slide()
+	animation_running(velocity.x)
+	animation_jumping(velocity.y)
